@@ -1,0 +1,51 @@
+{
+  "data": "C:\\Users\\User\\Desktop\\avito_stazh\\old_train_data\\synthetic_orientation",
+  "best_brier": 0.0016332495892665833,
+  "history": [
+    {
+      "n": 4000,
+      "brier": 0.005886208256030841,
+      "score_1_minus_brier": 0.9941137917439692,
+      "accuracy": 0.993,
+      "epoch": 1,
+      "train_bce": 0.21935195385639866,
+      "seconds": 332.8257085000005
+    },
+    {
+      "n": 4000,
+      "brier": 0.003930057006684365,
+      "score_1_minus_brier": 0.9960699429933156,
+      "accuracy": 0.995,
+      "epoch": 2,
+      "train_bce": 0.011902750703537216,
+      "seconds": 205.11011159999907
+    },
+    {
+      "n": 4000,
+      "brier": 0.0016332495892665833,
+      "score_1_minus_brier": 0.9983667504107334,
+      "accuracy": 0.9975,
+      "epoch": 3,
+      "train_bce": 0.0030183927732092947,
+      "seconds": 219.61235610000222
+    },
+    {
+      "n": 4000,
+      "brier": 0.0018718286534716918,
+      "score_1_minus_brier": 0.9981281713465283,
+      "accuracy": 0.9975,
+      "epoch": 4,
+      "train_bce": 0.0014656585002085195,
+      "seconds": 236.71623319999708
+    },
+    {
+      "n": 4000,
+      "brier": 0.0021729547826984763,
+      "score_1_minus_brier": 0.9978270452173015,
+      "accuracy": 0.997,
+      "epoch": 5,
+      "train_bce": 0.0006315375582499352,
+      "seconds": 238.57622840000113
+    }
+  ]
+}

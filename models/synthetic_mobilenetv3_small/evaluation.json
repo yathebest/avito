@@ -1,0 +1,9 @@
+{
+  "checkpoint": "C:\\Users\\User\\Desktop\\avito_stazh\\models\\synthetic_mobilenetv3_small\\best.pt",
+  "checkpoint_epoch": 3,
+  "validation_csv": "C:\\Users\\User\\Desktop\\avito_stazh\\old_train_data\\synthetic_orientation\\val.csv",
+  "n": 4000,
+  "brier": 0.0016331039213857968,
+  "score_1_minus_brier": 0.9983668960786142,
+  "accuracy": 0.9975
+}

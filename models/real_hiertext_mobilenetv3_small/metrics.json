@@ -1,0 +1,49 @@
+{
+  "train_csv": "C:\\Users\\User\\Desktop\\avito_stazh\\old_train_data\\real_orientation_train.csv",
+  "val_csv": "C:\\Users\\User\\Desktop\\avito_stazh\\old_validation_data\\orientation_val\\val.csv",
+  "warmstart_validation": {
+    "n": 6000,
+    "brier": 0.296155935605367,
+    "score_1_minus_brier": 0.703844064394633,
+    "accuracy": 0.6215
+  },
+  "best_brier": 0.07681398852666219,
+  "history": [
+    {
+      "n": 6000,
+      "brier": 0.11726419305801392,
+      "score_1_minus_brier": 0.8827358069419861,
+      "accuracy": 0.8295,
+      "epoch": 1,
+      "train_bce": 0.5170140205860138,
+      "seconds": 306.5824184999983
+    },
+    {
+      "n": 6000,
+      "brier": 0.0926436718304952,
+      "score_1_minus_brier": 0.9073563281695048,
+      "accuracy": 0.866,
+      "epoch": 2,
+      "train_bce": 0.31102342636585234,
+      "seconds": 264.8930122999991
+    },
+    {
+      "n": 6000,
+      "brier": 0.07947092509269714,
+      "score_1_minus_brier": 0.9205290749073028,
+      "accuracy": 0.8836666666666667,
+      "epoch": 3,
+      "train_bce": 0.2521964999914169,
+      "seconds": 271.4472239000024
+    },
+    {
+      "n": 6000,
+      "brier": 0.07681398852666219,
+      "score_1_minus_brier": 0.9231860114733378,
+      "accuracy": 0.8873333333333333,
+      "epoch": 4,
+      "train_bce": 0.22380378955602645,
+      "seconds": 281.4068077000011
+    }
+  ]
+}

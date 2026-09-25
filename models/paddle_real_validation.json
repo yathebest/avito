@@ -1,0 +1,10 @@
+{
+  "model": "PP-LCNet_x1_0_textline_ori",
+  "validation": "official HierText validation split; geometry-inferred base labels",
+  "n": 6000,
+  "brier": 0.060921877511150406,
+  "score_1_minus_brier": 0.9390781224888496,
+  "accuracy": 0.9185,
+  "seconds": 88.19499110000106,
+  "device": "cpu"
+}
