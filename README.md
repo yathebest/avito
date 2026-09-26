@@ -1,51 +1,22 @@
-# Ориентация текстового кропа для Avito
+# Ориентация текстовых кропов Avito
 
-Для каждого изображения предсказывается p_180 — вероятность, что текст перевёрнут на 180°. Результат — submission.csv с колонками image_id,p_180 и 20 000 строками. Оценка: 1 − mean((p_180 − y_180)^2).
+Нужно предсказать `p_180` — вероятность, что текст в кропе перевёрнут на 180°. Каждый ноутбук самостоятельно читает 20 000 изображений, сверяет их с `sample_submission.csv`, делает предсказания и записывает `submission.csv` с колонками `image_id,p_180`. Время загрузки моделей, чтения изображений, инференса и всего запуска выводится в конце. В проекте нет отдельных Python-скриптов, необходимых для работы ноутбуков.
 
-## Итоговое решение
+## Два варианта
 
-Финальный submission.csv создан скриптом predict_submission.py с локальными весами [PP-LCNet_x1_0_textline_ori](https://paddlepaddle.github.io/PaddleX/3.7/en/module_usage/tutorials/ocr_modules/textline_orientation_classification.html) из PaddleOCR/PaddleX. Каждое изображение подаётся модели дважды: как есть и после точного поворота на 180°. Если модель выдаёт вероятности переворота p0 и p1, итог равен sigmoid((logit(p0) − logit(p1)) / 2). Перед logit значения ограничиваются интервалом [1e-6, 1-1e-6]. Коэффициент 1/2 фиксирован; дополнительная модель не обучается.
+| Ноутбук | Модели | Устройство | Проверка на HierText validation |
+| --- | --- | --- | ---: |
+| `main.ipynb` | [PP-LCNet_x1_0_textline_ori](https://paddlepaddle.github.io/PaddleX/3.7/en/module_usage/tutorials/ocr_modules/textline_orientation_classification.html), исходный кроп и поворот на 180° | CPU | 0.98424 по 1−Brier |
+| `main_full_ocr.ipynb` | та же модель и [eslav_PP-OCRv5_mobile_rec](https://paddlepaddle.github.io/PaddleX/3.7/en/module_usage/tutorials/ocr_modules/text_recognition.html), обе ориентации каждого кропа | GPU при наличии CUDA, иначе CPU | 0.99409 по 1−Brier |
 
-Веса лежат в models/PP-LCNet_x1_0_textline_ori_infer/ (около 6,5 МБ). При инференсе используется одна компактная модель, но два её прогона на кроп. Внешние API и LLM/VLM не используются.
+Быстрый вариант объединяет две оценки классификатора как `sigmoid((logit(p0) − logit(p180)) / 2)`. Полный вариант добавляет к его logit разницу уверенности распознавания текста: `20 × (score_180 − score_0)`. В нём OCR вызывается для **каждого** изображения, без отбора по уверенности. Веса обеих моделей лежат в `models/`; во время инференса ничего не скачивается и внешние API не используются.
+
+Быстрый вариант дал **0.95944706** на Stepik. Полный вариант на Stepik пока не проверен; значение 0.99409 получено только на псевдоразмеченной валидации [HierText](https://github.com/google-research-datasets/hiertext) и не гарантирует такой же результат на тесте Avito. Тестовые изображения вручную не размечались. Из 3000 исходных строк HierText сделаны версии с поворотом на 180°; исходную ориентацию определяли по геометрии строк. Сохранённые данные этой проверки находятся в `validation/`.
 
 ## Запуск
 
-Проверено на Python 3.13.9, PaddleOCR 3.7.0, PaddlePaddle 3.3.0. Из корня проекта:
+1. Откройте нужный `.ipynb` из корня проекта в Jupyter или VS Code и выберите Python-окружение с PaddleOCR 3.7.0, NumPy 2.3.5 и Pillow 12.1.0. Для быстрого CPU-варианта зависимости перечислены в `requirements.txt`. Для GPU-варианта установите подходящую [CUDA-сборку PaddlePaddle 3.3.0](https://www.paddlepaddle.org.cn/documentation/docs/en/install/pip/windows-pip.html) вместо CPU-сборки.
+2. Положите распакованный тест в `test_data/` (`sample_submission.csv` и `test/images/*.png`) или `test.zip` в корень проекта. Если файлы лежат в другом месте, задайте `AVITO_TEST_PATH`; если Jupyter открыт из другой папки, задайте `AVITO_PROJECT_DIR`.
+3. Выполните **Run All**. Ноутбук создаст или заменит `submission.csv` в корне проекта и напечатает фактическое время на вашем устройстве.
 
-    py -3.13 -m venv .venv
-    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-    $env:AVITO_TEST_PATH = 'C:\path\to\test_data'
-    .\.venv\Scripts\python.exe predict_submission.py
-
-Вместо распакованной папки можно передать путь к test.zip. В папке ожидаются sample_submission.csv и test/images/; в архиве — sample_submission.csv и test/images/*.png. Если AVITO_TEST_PATH не задана, скрипт ищет test.zip или test_data/ рядом с собой, затем в Downloads. Выход пишется в submission.csv рядом со скриптом. Скрипт проверяет количество, уникальность и наличие всех тестовых изображений. Запуск на тех же данных с теми же локальными весами воспроизводит отправленный CSV.
-
-## Проверка качества
-
-Для подбора подхода использовался отдельный официальный split [HierText validation](https://github.com/google-research-datasets/hiertext): 3000 исходных кропов и их точные повороты на 180° (всего 6000). В HierText нет готовых меток ориентации. Исходно прямыми считаются строки минимум из трёх слов с порядком чтения слева направо и углом не больше 10°. Это геометрическая псевдоразметка, возможны ошибки. Разделение train/validation сделано по официальным исходным изображениям, а не по случайным кропам. Тест Avito вручную не размечался и не использовался для обучения.
-
-| Подход | 1 − Brier на HierText validation |
-| --- | ---: |
-| PaddleOCR, один прогон | 0.93908 |
-| MobileNetV3-Small после обучения на синтетике и HierText train | 0.92319 |
-| Ансамбль MobileNet и однопроходной PaddleOCR | 0.95373 |
-| Итоговый PaddleOCR с двумя поворотами | **0.98424** |
-
-Обе оценки PaddleOCR можно воспроизвести по сохранённым предсказаниям: python validation/evaluate.py. validation/prepare_validation.py создаёт валидационную выборку из исходного HierText; evaluate_model.py повторно получает предсказания модели, если исходные изображения скачаны. Случайная выборка фиксирована seed 20260926. Файлы экспериментов с MobileNet и промежуточными метриками лежат в models/; они не участвуют в финальном инференсе. Выбрана одна PaddleOCR, потому что два поворота дали лучший результат на этой валидации при меньшем размере, чем ансамбль.
-
-Эти числа не равны скрытому скору Avito. Отправленный submission.csv получил на Stepik **0.95944706**; это единственный официальный замер данного решения, и он показывает разницу между HierText и тестом Avito.
-
-## Повторение экспериментов
-
-Для обучения MobileNet используйте отдельное виртуальное окружение с requirements-train.txt: в нём закреплены версии PyTorch 2.6.0 и TorchVision 0.21.0, применённые в эксперименте. Для GPU выберите подходящую сборку PyTorch по [официальной инструкции](https://pytorch.org/get-started/previous-versions/). Скачайте [HierText](https://github.com/google-research-datasets/hiertext): old_train_data/json/train.jsonl и JPG из train.tgz в old_train_data/, а old_validation_data/validation.jsonl.gz и JPG в old_validation_data/validation/. Затем запустите:
-
-    python make_hiertext_crops.py
-    python build_train_orientation_csv.py
-    python make_synthetic_orientation.py
-    python train_synthetic_orientation.py
-    python prepare_real_orientation.py
-    python train_real_orientation.py
-    python evaluate_real_orientation.py
-
-make_synthetic_orientation.py использует системные шрифты Windows; для другого набора шрифтов можно задать AVITO_FONT_DIR. Обучающие скрипты используют фиксированные seed. Данные и чекпоинты MobileNet не требуются для получения итогового submission.csv.
-
-Использованы открытые [PaddleOCR/PaddleX](https://github.com/PaddlePaddle/PaddleOCR), [PyTorch/TorchVision](https://pytorch.org/) для экспериментов, [HierText](https://github.com/google-research-datasets/hiertext), NumPy и Pillow. Локальные веса PaddleOCR взяты из открытой модели, указанной выше.
+Запуск второго ноутбука заменит CSV от первого. Для сравнения сохраните копию нужного файла до следующего запуска. Ноутбуки используют локальные компактные модели; LLM/VLM не применяются.
