@@ -8,3 +8,12 @@ __pycache__/
 .pytest_cache/
 results/
 submission_hard.csv
+submission.csv
+main_full_ocr.ipynb
+models/eslav_PP-OCRv5_mobile_rec_infer/
+models/real_hiertext_mobilenetv3_small/
+models/synthetic_mobilenetv3_small/
+models/paddle_real_validation.json
+models/paddle_real_validation_predictions.csv
+models/validation_ensemble_analysis.json
+validation/
