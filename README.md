@@ -20,3 +20,31 @@
 3. Выполните **Run All**. Ноутбук создаст или заменит `submission.csv` в корне проекта и напечатает фактическое время на вашем устройстве.
 
 Запуск второго ноутбука заменит CSV от первого. Для сравнения сохраните копию нужного файла до следующего запуска. Ноутбуки используют локальные компактные модели; LLM/VLM не применяются.
+
+## Запуск в Docker
+
+Контейнер запускает те же ноутбуки без установки PaddleOCR в системный Python. Перейдите в корень проекта в PowerShell. Папки `models/` и `test_data/` должны быть здесь же: проект монтируется в `/work`, поэтому полученный `submission.csv` сохраняется на компьютере рядом с ноутбуками. Выполненный ноутбук с замерами времени сохраняется в `results/executed.ipynb`.
+
+Быстрый CPU-вариант:
+
+```powershell
+docker build -t avito-orientation:cpu .
+docker run --rm --network none --mount "type=bind,source=$($PWD.Path),target=/work" avito-orientation:cpu main.ipynb
+```
+
+Полный вариант на NVIDIA GPU:
+
+```powershell
+docker build --build-arg PADDLE_VARIANT=gpu -t avito-orientation:gpu .
+docker run --rm --network none --gpus all --mount "type=bind,source=$($PWD.Path),target=/work" avito-orientation:gpu main_full_ocr.ipynb
+```
+
+Для второго варианта нужны совместимые драйвер NVIDIA, Docker с доступом к GPU и достаточно памяти видеокарты; на Windows Docker Desktop использует WSL 2. Если GPU недоступен, `main_full_ocr.ipynb` можно выполнить в CPU-контейнере, заменив имя ноутбука в первой команде `docker run`. Проверить установленный внутри образа Paddle можно так:
+
+```powershell
+docker run --rm --entrypoint python avito-orientation:cpu -c "import paddle, paddleocr; print(paddle.__version__, paddle.is_compiled_with_cuda())"
+```
+
+На Linux запускайте те же команды из Bash, заменив `source=$($PWD.Path)` на `source=$(pwd)`. CPU-образ рассчитан на x86-64 с поддержкой AVX. GPU-образ собирается с CUDA 12.9 и требует совместимого NVIDIA-драйвера. При запуске сеть контейнера отключена (`--network none`): инференс использует только локальные веса.
+
+`requirements.txt` нужен только для запуска без Docker. Версии основных библиотек зафиксированы и в Dockerfile. Образ не содержит тестовые данные и веса: они читаются из примонтированного проекта, поэтому передача результатов проверяющему требует приложить `models/` и исходные тестовые файлы либо указать, где их получить.
