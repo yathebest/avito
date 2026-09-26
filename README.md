@@ -25,7 +25,7 @@
 
 ## Запуск в Docker
 
-Контейнер запускает те же ноутбуки без установки PaddleOCR в системный Python. Перейдите в корень проекта в PowerShell. Папки `models/` и `test_data/` должны быть здесь же: проект монтируется в `/work`, поэтому полученный `submission.csv` сохраняется на компьютере рядом с ноутбуками. Выполненный ноутбук с замерами времени сохраняется в `results/executed.ipynb`.
+Проверяющему не нужно обучать модель: веса находятся в репозитории в `models/`. Нужны Docker и выданный тестовый набор в `test_data/` или `test.zip`; затем достаточно двух команд ниже. Контейнер запускает те же ноутбуки без установки PaddleOCR в системный Python. Перейдите в корень проекта в PowerShell. Проект монтируется в `/work`, поэтому полученный `submission.csv` сохраняется на компьютере рядом с ноутбуками. Выполненный ноутбук с замерами времени сохраняется в `results/executed.ipynb`.
 
 Быстрый CPU-вариант:
 
@@ -49,4 +49,28 @@ docker run --rm --entrypoint python avito-orientation:cpu -c "import paddle, pad
 
 На Linux запускайте те же команды из Bash, заменив `source=$($PWD.Path)` на `source=$(pwd)`. CPU-образ рассчитан на x86-64 с поддержкой AVX. GPU-образ собирается с CUDA 12.9 и требует совместимого NVIDIA-драйвера. При запуске сеть контейнера отключена (`--network none`): инференс использует только локальные веса.
 
-`requirements.txt` нужен только для запуска без Docker. Версии основных библиотек зафиксированы и в Dockerfile. Образ не содержит тестовые данные и веса: они читаются из примонтированного проекта, поэтому передача результатов проверяющему требует приложить `models/` и исходные тестовые файлы либо указать, где их получить.
+`requirements.txt` нужен только для запуска без Docker. Версии основных библиотек зафиксированы и в Dockerfile. Образ не содержит тестовые данные и веса: они читаются из примонтированного проекта. Веса уже хранятся в `models/` репозитория; проверяющему нужен только выданный ему тестовый набор.
+
+## Kaggle: полный OCR на GPU
+
+Docker внутри Kaggle Notebook не нужен. Добавьте приватный Kaggle Dataset с папками `models/` и `test_data/` в той же структуре, что в этом проекте. В настройках Notebook выберите GPU и включите Internet на время установки пакетов. **Не используйте `pip install -r requirements.txt` для GPU:** там указана CPU-сборка Paddle. Перед первой ячейкой `main_full_ocr.ipynb` добавьте две ячейки:
+
+```python
+%pip install --no-cache-dir paddlepaddle-gpu==3.3.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+%pip install --no-cache-dir paddleocr==3.7.0 numpy==2.3.5 Pillow==12.1.0
+```
+
+```python
+import os
+from pathlib import Path
+
+data_dir = Path("/kaggle/input/ИМЯ-ВАШЕГО-ДАТАСЕТА")
+assert (data_dir / "models" / "PP-LCNet_x1_0_textline_ori_infer").is_dir()
+assert (data_dir / "models" / "eslav_PP-OCRv5_mobile_rec_infer").is_dir()
+assert (data_dir / "test_data" / "test" / "images").is_dir()
+os.environ["AVITO_PROJECT_DIR"] = str(data_dir)
+os.environ["AVITO_OUTPUT_DIR"] = "/kaggle/working"
+os.environ["AVITO_REQUIRE_GPU"] = "1"
+```
+
+Затем выполните **Run All**. Итоговый файл будет в `/kaggle/working/submission.csv`. В выводе первой ячейки ноутбука проверьте `CUDA build: True`, `visible GPUs` больше нуля и `inference device: gpu:0`. Если на выделенном Kaggle GPU установленная CUDA-сборка Paddle не работает, ноутбук остановится до обработки 20 000 файлов; уберите `AVITO_REQUIRE_GPU` для CPU-варианта или выберите совместимую сборку Paddle согласно [официальной инструкции](https://www.paddlepaddle.org.cn/documentation/docs/en/install/pip/linux-pip_en.html). После установки зависимостей распознавание использует локальные веса и не обращается к внешним API.
