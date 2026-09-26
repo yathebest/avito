@@ -3,12 +3,12 @@
 Run: python make_hiertext_crops.py
 
 Expected source layout:
-    C:/Users/User/Desktop/avito_stazh/train_data/json/train.jsonl
-    C:/Users/User/Desktop/avito_stazh/train_data/<image_id>.jpg
+    old_train_data/json/train.jsonl
+    old_train_data/<image_id>.jpg
 
 Output:
-    C:/Users/User/Desktop/avito_stazh/train_data/images/<image_id>_line_<index>.png
-    C:/Users/User/Desktop/avito_stazh/train_data/images/manifest.csv
+    old_train_data/images/<image_id>_line_<index>.png
+    old_train_data/images/manifest.csv
 
 The output crops do not yet have trustworthy 0/180 orientation labels.
 """
@@ -28,7 +28,7 @@ from PIL import Image
 
 
 # Paths match the extracted HierText files in the current project.
-TRAIN_DIR = Path(r"C:\Users\User\Desktop\avito_stazh\train_data")
+TRAIN_DIR = Path(__file__).resolve().parent / "old_train_data"
 ANNOTATIONS_PATH = TRAIN_DIR / "json" / "train.jsonl"
 SOURCE_IMAGES_DIR = TRAIN_DIR
 OUTPUT_IMAGES_DIR = TRAIN_DIR / "images"

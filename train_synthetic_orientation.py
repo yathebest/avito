@@ -25,7 +25,7 @@ from torchvision import transforms
 from torchvision.models import MobileNet_V3_Small_Weights, mobilenet_v3_small
 
 
-PROJECT_DIR = Path(r"C:\Users\User\Desktop\avito_stazh")
+PROJECT_DIR = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_DIR / "old_train_data" / "synthetic_orientation"
 OUTPUT_DIR = PROJECT_DIR / "models" / "synthetic_mobilenetv3_small"
 

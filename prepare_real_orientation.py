@@ -20,7 +20,7 @@ from build_train_orientation_csv import label_line
 from make_hiertext_crops import iter_annotations, line_rectangle
 
 
-PROJECT_DIR = Path(r"C:\Users\User\Desktop\avito_stazh")
+PROJECT_DIR = Path(__file__).resolve().parent
 TRAIN_DIR = PROJECT_DIR / "old_train_data"
 VAL_DIR = PROJECT_DIR / "old_validation_data"
 VAL_JSON = VAL_DIR / "validation.jsonl.gz"

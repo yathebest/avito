@@ -11,15 +11,17 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 import random
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 
-PROJECT_DIR = Path(r"C:\Users\User\Desktop\avito_stazh")
-OUTPUT_DIR = PROJECT_DIR / "train_data" / "synthetic_orientation"
-FONT_DIR = Path(r"C:\Windows\Fonts")
+PROJECT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = PROJECT_DIR / "old_train_data" / "synthetic_orientation"
+WINDOWS_DIR = Path(os.environ.get("WINDIR", "C:/Windows"))
+FONT_DIR = Path(os.environ.get("AVITO_FONT_DIR", WINDOWS_DIR / "Fonts"))
 FONT_NAMES = (
     "arial.ttf", "arialbd.ttf", "calibri.ttf", "calibrib.ttf",
     "times.ttf", "timesbd.ttf", "tahoma.ttf", "tahomabd.ttf",

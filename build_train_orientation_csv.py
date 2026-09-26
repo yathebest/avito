@@ -24,7 +24,7 @@ from make_hiertext_crops import iter_annotations
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-TRAIN_DIR = PROJECT_DIR / "train_data"
+TRAIN_DIR = PROJECT_DIR / "old_train_data"
 ANNOTATIONS_PATH = TRAIN_DIR / "json" / "train.jsonl"
 MANIFEST_PATH = TRAIN_DIR / "images" / "manifest.csv"
 LABELS_PATH = TRAIN_DIR / "orientation_labels.csv"
@@ -94,7 +94,7 @@ def annotation_labels() -> dict[str, tuple[int | None, str, str, int]]:
 
 def main() -> None:
     if not ANNOTATIONS_PATH.is_file() or not MANIFEST_PATH.is_file():
-        raise FileNotFoundError("Expected train_data/json/train.jsonl and train_data/images/manifest.csv")
+        raise FileNotFoundError("Expected old_train_data/json/train.jsonl and old_train_data/images/manifest.csv")
 
     labels = annotation_labels()
     counts = Counter()

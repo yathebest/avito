@@ -27,7 +27,7 @@ from torchvision import transforms
 from torchvision.models import mobilenet_v3_small
 
 
-PROJECT_DIR = Path(r"C:\Users\User\Desktop\avito_stazh")
+PROJECT_DIR = Path(__file__).resolve().parent
 TRAIN_CSV = PROJECT_DIR / "old_train_data" / "real_orientation_train.csv"
 VAL_CSV = PROJECT_DIR / "old_validation_data" / "orientation_val" / "val.csv"
 WARMSTART = PROJECT_DIR / "models" / "synthetic_mobilenetv3_small" / "best.pt"
